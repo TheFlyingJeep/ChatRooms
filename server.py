@@ -10,4 +10,4 @@ class TCPServerHandler(socketserver.BaseRequestHandler):
         self.data = self.request.recv(1024).strip()
         print("{} wrote:".format(self.client_address[0]))
         print(self.data)
-        self.request.sendall(self.data)    
+        self.request.sendall(self.data)

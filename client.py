@@ -1,12 +1,26 @@
-import socket, sys
+import socket, multiprocessing
 
 
-#Create socket, connect it to specific port on flippinnublet (Should probably do error handling)
+def listen_thread(sock):
+    while 1:
+        data = str(sock.recv(1024), "utf-8")
+        if data != None and data != "":
+            print(data)
+
+
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
     sock.connect(("flippinnublet.com", 5432))
-    data = "Testing out sockets"
-    #Byte data go brr send and then just rereceive, will also receive any message from anyone connected to the TCPServer once it permanently listens
-    sock.sendall(bytes(data+"\n", "utf-8"))
-    received = str(sock.recv(1024), "utf-8")
-    print("Sent: {}".format(data))
-    print("Received: {}".format(received))
+    sock.send(bytes("Connected", "utf-8"))
+    receivedConnection = str(sock.recv(1024), "utf-8")
+    print(receivedConnection)
+    sock_listen = multiprocessing.Process(target=listen_thread, args=(sock,))
+    sock_listen.start()
+    while 1:
+        command = input("Send a message (type /exit to quit): ")
+        if command.lower() == "/exit":
+            break
+        else:
+            sock.send(bytes(command, "utf-8"))
+    sock_listen.join()
+    sock.close()
+    exit()
